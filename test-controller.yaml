@@ -1,0 +1,40 @@
+substitutions:
+  deviceName: modecontrollertest
+  mqttBroker: 10.0.1.108
+  mqttUser:  switch
+
+external_components:
+- source:
+    type: local
+    path: esphome/components
+
+esphome:
+  name: ${deviceName}
+  platform: ESP8266
+  board: d1_mini
+  build_path: devices/${deviceName}
+  includes:
+    - controller/
+
+wifi:
+  networks:
+    - ssid: !secret wifi_main_ssid
+      password: !secret wifi_main_passwd
+    - ssid: !secret wifi_aux_ssid
+      password: !secret wifi_aux_passwd
+
+  #use_address: irheaterplug.local
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${deviceName} Fallback AP"
+    password: !secret fallbackPwd
+
+captive_portal:
+
+
+modecontroller:
+  controller:
+   - esphome::modecontroller::ControllerA
+
+  

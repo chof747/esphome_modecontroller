@@ -16,25 +16,23 @@ esphome:
   includes:
     - controller/
 
-wifi:
-  networks:
-    - ssid: !secret wifi_main_ssid
-      password: !secret wifi_main_passwd
-    - ssid: !secret wifi_aux_ssid
-      password: !secret wifi_aux_passwd
-
-  #use_address: irheaterplug.local
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "${deviceName} Fallback AP"
-    password: !secret fallbackPwd
-
-captive_portal:
+logger:
 
 
 modecontroller:
+  id: test
   controller:
    - esphome::modecontroller::ControllerA
+   - esphome::modecontroller::ControllerB
+  initial: esphome::modecontroller::ControllerB
 
-  
+binary_sensor:
+    - platform: gpio
+      pin:
+        number: D3
+        inverted: true
+      id: btnControl
+      on_click: 
+        then:
+          - lambda: |-
+              //modecontroller::getActiveController<modecontroller::BaseController>(id(test))->

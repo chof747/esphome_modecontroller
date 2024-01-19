@@ -16,8 +16,9 @@ namespace esphome
       } 
 
       virtual void setup() override;
-
       virtual void activate() override;
+
+      virtual void btnPressed() override;
 
     private:
       const char *TAG{"controller_b"};
@@ -36,5 +37,13 @@ void esphome::modecontroller::ControllerB::activate()
 {
   ESP_LOGD(TAG, "Controller B Activated");
 }
+
+void esphome::modecontroller::ControllerB::btnPressed()
+//************************************************x****************************************
+{
+  ESP_LOGD(TAG, "Buttton Pressed");
+}
+
+
 
 #endif // CONTROLLER_B_H

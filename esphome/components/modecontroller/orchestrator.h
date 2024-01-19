@@ -3,43 +3,106 @@
 
 #include <map>
 #include <memory>
-#include "esphome/core/component.h"
+#include <esphome/core/component.h>
+#include <esphome/core/log.h>
 
+#include "ctrlorchestrator.h"
 
-namespace esphome 
+namespace esphome
 {
   namespace modecontroller
   {
-    class ModeController;
-    
-    class Orchestrator : public esphome::Component
+
+    template <class ControllerType>
+    class Orchestrator : public esphome::Component, public ControllerOrchestrator
     {
-      public:
-        void addController(std::string name, ModeController* controller);
-        void setInitialController(std::string name);
-        std::shared_ptr<ModeController> activate(std::string name);
+    public:
+      typedef std::shared_ptr<ControllerType> ctrlPtr_type;
 
-        void setup();
-        void loop();
+      void addController(std::string name, ControllerType *controller)
+      //**********************************************************************************
+      {
+        controllers[name] = ctrlPtr_type(controller);
+        controller->setOrchestrator(this);
+      }
 
-        std::shared_ptr<ModeController> getActive() { return activeController; }
+      void setInitialController(std::string name)
+      //**********************************************************************************
+      {
+        if (controllers.find(name) == controllers.end())
+        {
+          ESP_LOGE("orchestrator", "not found initial");
+          return;
+        }
+        else
+        {
+          ESP_LOGD("orchestrator", "set initial to %s", name.c_str());
+          initialController = controllers[name];
+        }
+      }
 
-      private:
+      ctrlPtr_type activate(std::string name)
+      //**********************************************************************************
+      {
+        if (controllers.find(name) == controllers.end())
+        {
+          return nullptr;
+        }
 
-        void activateInitialController_();
+        if (nullptr != activeController)
+        {
+          activeController->deactivate();
+        }
 
-        std::map<std::string, std::shared_ptr<ModeController>> controllers;
+        activeController = controllers[name];
+        activeController->activate();
+        return activeController;
+      }
 
-        std::shared_ptr<ModeController> activeController{nullptr};
-        std::shared_ptr<ModeController> initialController{nullptr};
+      void setup()
+      //**********************************************************************************
+      {
+        for (auto &entry : controllers)
+        {
+          entry.second->setup();
+        }
+      }
+
+      void loop()
+      //**********************************************************************************
+      {
+        if (nullptr == activeController)
+        {
+          activateInitialController_();
+        }
+
+        activeController->loopActive();
+        for (auto &entry : controllers)
+        {
+          if (entry.second != activeController)
+          {
+            entry.second->loopInactive();
+          }
+        }
+      }
+
+      ctrlPtr_type getActive() { return activeController; }
+
+    private:
+      void activateInitialController_()
+      //**********************************************************************************
+      {
+        activeController = initialController;
+        initialController->activate();
+      }
+
+      std::map<std::string, ctrlPtr_type> controllers;
+
+      ctrlPtr_type activeController{nullptr};
+      ctrlPtr_type initialController{nullptr};
     };
-
-    template<class ControllerType> std::shared_ptr<ControllerType> getActiveController(Orchestrator* o)
-    {
-      dynamic_cast<std::shared_ptr<ControllerType>>(o->getActive());
-    } 
 
   };
 };
 
-#endif //ESPHOME_MODECONTROLLER_ORCHESTRATOR_H
+#endif // ESPHOME_MODECONTROLLER_ORCHESTRATOR_H

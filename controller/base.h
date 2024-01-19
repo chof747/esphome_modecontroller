@@ -7,7 +7,7 @@ namespace esphome
   {
     class BaseController: public ModeController {
       public:
-        void btnPressed() {}
+        virtual void btnPressed() {}
     };
   };
 };

@@ -21,6 +21,7 @@ logger:
 
 modecontroller:
   id: test
+  base_class: esphome::modecontroller::BaseController
   controller:
    - esphome::modecontroller::ControllerA
    - esphome::modecontroller::ControllerB
@@ -35,4 +36,4 @@ binary_sensor:
       on_click: 
         then:
           - lambda: |-
-              //modecontroller::getActiveController<modecontroller::BaseController>(id(test))->
+              id(test).getActive()->btnPressed();

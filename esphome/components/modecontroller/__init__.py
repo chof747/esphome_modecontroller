@@ -6,6 +6,7 @@ from esphome.cpp_types import std_vector, Component
 
 CONF_CONTROLLER = 'controller'
 CONF_INITIAL = 'initial'
+CONF_BASECLASS = 'base_class'
 
 modecontroller_ns = cg.esphome_ns.namespace("modecontroller")
 Orchestrator = modecontroller_ns.class_("Orchestrator", cg.Component)
@@ -22,13 +23,31 @@ def initialIsDefined(config):
 CONFIG_SCHEMA = cv.Schema(cv.All({
     cv.GenerateID(): cv.declare_id(Orchestrator),
     cv.Required(CONF_CONTROLLER): cv.ensure_list(cv.string),
-    cv.Required(CONF_INITIAL): cv.string
+    cv.Required(CONF_INITIAL): cv.string,
+    cv.Optional(CONF_BASECLASS, "esphome::modecontroller::ModeController"): cv.string
   },
   initialIsDefined
   ))
 
+def set_baseclass(baseclass):
+  tokens = baseclass.split("::")
+  classname = tokens[-1]
+  namespaces = tokens[:-1]
+
+  beginning = " ".join([f"namespace {n} {{" for n in namespaces])
+  classdecl = f"class {classname};"
+  closing   = " }" * len(namespaces)
+
+  cg.add_global(cg.RawExpression(f'{beginning} {classdecl} {closing}'))
+
 async def to_code(config):
-  var = cg.new_Pvariable(config[CONF_ID])
+
+  set_baseclass(config[CONF_BASECLASS])
+
+  #cg.add_global(cg.RawStatement(f'#include "base.h"'))
+
+  var = cg.new_Pvariable(config[CONF_ID], cg.TemplateArguments(
+    cg.RawExpression(config[CONF_BASECLASS])))
   await cg.register_component(var, config)
 
   #add the header file for the controller base class to main.cpp before the components are included

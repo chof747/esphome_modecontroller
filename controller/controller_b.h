@@ -11,8 +11,13 @@ namespace esphome
     class ControllerB : public BaseController
     {
     public:
-      virtual void loopActive()
+      virtual void loopInactive()
       {
+        static int cnt = 0;
+        if (0 == ((cnt++) % 500))
+        {
+          ESP_LOGD(TAG, "B inactive");
+        }
       } 
 
       virtual void setup() override;
@@ -42,6 +47,7 @@ void esphome::modecontroller::ControllerB::btnPressed()
 //************************************************x****************************************
 {
   ESP_LOGD(TAG, "Buttton Pressed");
+  orchestrator->activate("esphome::modecontroller::ControllerA");
 }
 
 

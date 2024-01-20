@@ -11,17 +11,29 @@ namespace esphome
     class ControllerA : public BaseController
     {
     public:
-      virtual void loopActive()
+      virtual void loopInactive()
       {
+        static int cnt = 0;
+        if (0 == ((cnt++) % 500))
+        {
+          ESP_LOGD(TAG, "A inactive");
+        }
       }
 
       virtual void setup() override;
       virtual void btnPressed() override;
+      virtual void activate() override;
 
     private:
       const char *TAG{"controller_a"};
     };
   }
+}
+
+void esphome::modecontroller::ControllerA::activate()
+//****************************************************************************************
+{
+  ESP_LOGD(TAG, "Controller A Activated");
 }
 
 void esphome::modecontroller::ControllerA::setup()

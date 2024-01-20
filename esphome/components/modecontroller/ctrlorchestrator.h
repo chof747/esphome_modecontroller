@@ -7,7 +7,8 @@ namespace esphome
   {
     class ControllerOrchestrator
     {
-        
+      public:
+        virtual void activate(std::string name) = 0;
     };
   };
 };

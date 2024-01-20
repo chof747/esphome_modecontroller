@@ -41,12 +41,12 @@ namespace esphome
         }
       }
 
-      ctrlPtr_type activate(std::string name)
+      virtual void activate(std::string name)
       //**********************************************************************************
       {
         if (controllers.find(name) == controllers.end())
         {
-          return nullptr;
+          return;
         }
 
         if (nullptr != activeController)
@@ -56,7 +56,7 @@ namespace esphome
 
         activeController = controllers[name];
         activeController->activate();
-        return activeController;
+        return;
       }
 
       void setup()

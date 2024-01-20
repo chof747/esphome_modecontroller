@@ -18,10 +18,10 @@ namespace esphome
       virtual void loopActive() {}
       virtual void loopInactive() {}
 
-      void setOrchestrator(const ControllerOrchestrator *o) { this->orchestrator = o; }
+      void setOrchestrator( ControllerOrchestrator *o) { this->orchestrator = o; }
 
     protected:
-      const ControllerOrchestrator *orchestrator{nullptr};
+      ControllerOrchestrator *orchestrator{nullptr};
     };
 
   } // namespace modecontroller
